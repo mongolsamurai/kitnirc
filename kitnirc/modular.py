@@ -1,7 +1,8 @@
-import ConfigParser
+import configparser
 import importlib
 import inspect
 import logging
+import imp
 
 _log = logging.getLogger(__name__)
 
@@ -199,7 +200,7 @@ class Controller(object):
         else:
             self.config_path = config_path
 
-        config = ConfigParser.SafeConfigParser(self.DEFAULT_SUBSTITUTIONS,
+        config = configparser.SafeConfigParser(self.DEFAULT_SUBSTITUTIONS,
                                                allow_no_value=True)
         # Avoid the configparser automatically lowercasing keys
         config.optionxform = str
@@ -207,7 +208,7 @@ class Controller(object):
         try:
             with open(config_path) as f:
                 config.readfp(f)
-        except (IOError, ConfigParser.Error):
+        except (IOError, configparser.Error):
             _log.exception("Ignoring config from %s due to error.", config_path)
             return False
 
@@ -238,7 +239,7 @@ class Controller(object):
         Returns True if all modules reloaded successfully, otherwise False.
         """
         old_modules = set(self.loaded_modules)
-        for module in self.loaded_modules.itervalues():
+        for module in self.loaded_modules.values():
             module.stop(reloading=True)
 
         self.loaded_modules = {}
@@ -325,7 +326,7 @@ class Controller(object):
 
             # Force the module to actually be reloaded
             try:
-                _temp = reload(importlib.import_module(module_name))
+                _temp = imp.reload(importlib.import_module(module_name))
             except ImportError:
                 _log.error("Unable to load module '%s' - module not found.",
                            module_name)

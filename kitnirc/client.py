@@ -478,7 +478,7 @@ class Client(object):
         chanmodes = self._get_chanmodes()
         list_modes, always_arg_modes, set_arg_modes, toggle_modes = chanmodes
         # User privilege levels are not always included in channel modes list
-        always_arg_modes |= set(self._get_prefixes().itervalues())
+        always_arg_modes |= set(self._get_prefixes().values())
 
         def _arg_to_list(arg, argument_modes, toggle_modes):
             if not isinstance(arg, dict):
@@ -493,7 +493,7 @@ class Client(object):
             # Okay, so arg is a dict
             modes_with_args = []
             modes_without_args = set()
-            for k,v in arg.iteritems():
+            for k,v in arg.items():
                 if isinstance(v, str):
                     v = [v]
                 if k in argument_modes:
@@ -553,7 +553,7 @@ class Client(object):
         if feature_prefixes:
             modes = feature_prefixes[1:len(feature_prefixes)//2]
             symbols = feature_prefixes[len(feature_prefixes)//2+1:]
-            prefixes = dict(zip(symbols, modes))
+            prefixes = dict(list(zip(symbols, modes)))
         return prefixes
 
     def _get_chanmodes(self):
@@ -715,7 +715,7 @@ def _parse_quit(client, command, actor, args):
     actor = User(actor)
     _, _, message = args.partition(':')
     client.dispatch_event("QUIT", actor, message)
-    for chan in client.server.channels.itervalues():
+    for chan in client.server.channels.values():
         if actor.nick in chan.members:
             chan.remove_user(actor)
             client.dispatch_event("MEMBERS", chan)
@@ -860,7 +860,7 @@ def _parse_mode(client, command, actor, args):
     # channel-specific modes
     chan = client.server.get_channel(channel)
 
-    user_modes = set(client._get_prefixes().itervalues())
+    user_modes = set(client._get_prefixes().values())
 
     chanmodes = client._get_chanmodes()
     list_modes, always_arg_modes, set_arg_modes, toggle_modes = chanmodes
@@ -934,7 +934,7 @@ def _parse_whois(client, command, actor, args):
 
     if command == "WHOISCHANNELS":
         modes = "".join(client._get_prefixes())
-        print repr(modes)
+        print(repr(modes))
         channels = args.lstrip(":").split()
         response["channels"] = dict(
             (chan.lstrip(modes), chan[0] if chan[0] in modes else "")
@@ -971,7 +971,7 @@ def _parse_nick(client, command, actor, args):
         client.user.nick = new_nick
 
     modified_channels = set()
-    for channel in client.server.channels.itervalues():
+    for channel in client.server.channels.values():
         user = channel.members.get(old_nick)
         if user:
             user.nick = new_nick

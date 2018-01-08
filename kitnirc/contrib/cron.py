@@ -40,7 +40,7 @@ class Cron(object):
                 if divisor:
                     divisor = int(divisor)
                     offset = random.randint(0, divisor-1)
-                    values.update(range(offset, count, divisor))
+                    values.update(list(range(offset, count, divisor)))
                 else:
                     values.add(random.randint(0, count-1))
                 continue
@@ -50,9 +50,9 @@ class Cron(object):
                 # With an optional /X to specify "every Xth value"
                 _, _, divisor = item.partition("/")
                 if divisor:
-                    values.update(range(0, count, int(divisor)))
+                    values.update(list(range(0, count, int(divisor))))
                 else:
-                    values.update(range(count))
+                    values.update(list(range(count)))
                 continue
 
             _log.warning("Ignoring invalid specifier '%s' for cron event '%s'",
